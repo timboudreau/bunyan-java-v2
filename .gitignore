@@ -1,0 +1,18 @@
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.orig
+*.iml
+.idea/*
+target/
+
+bunyan-java-v2/nb-configuration.xml
+/bunyan-java-v2/nbproject/
+/bunyan-v2-mongodb-sink/nbproject/
+/bunyan-java-v2-local-cached-remote-sinks/nbproject/
+/giulius-bunyan-java-v2/nbproject
+nbproject/
+nb-configuration.xml

@@ -1,0 +1,3 @@
+Maybe logsink should take the name/pid/hostname/etc instead of them already being
+bundled in the map - would simplify compressing implementation.
+

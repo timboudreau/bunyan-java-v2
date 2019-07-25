@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.mastfrog</groupId>
+        <artifactId>mastfrog-parent</artifactId>
+        <version>2.5.1-dev</version>
+        <relativePath/>
+    </parent>
+    <artifactId>bunyan-java-v2-parent</artifactId>
+    <name>Bunyan-Java V2 (modules)</name>
+    <packaging>pom</packaging>
+    <modules>
+        <module>bunyan-java-v2</module>
+        <!--
+                <module>acteur-bunyan-java</module>
+                <module>bunyan-parse</module>
+                <module>bunyan-java-mongodb-sink/bunyan-java-mongodb-sink</module>
+                <module>bunyan-java-log4j-appender</module>
+                <module>bunyan-java-util-logging</module>
+                <module>bunyan-log4j2-appender</module>
+        -->
+        <module>bunyan-java-v2-local-cached-remote-sinks</module>
+        <module>bunyan-v2-mongodb-sink</module>
+        <module>giulius-bunyan-java-v2</module>
+        <module>acteur-bunyan-v2</module>
+    </modules>
+    <url>https://github.com/timboudreau/bunyan-java-v2</url>
+    <scm>
+        <url>https://github.com/timboudreau/bunyan-java-v2.git</url>
+        <connection>scm:git:https://github.com/timboudreau/bunyan-java-v2.git</connection>
+        <developerConnection>git@github.com/timboudreau/bunyan-java-v2.git</developerConnection>
+    </scm>
+    <organization>
+        <name>Mastfrog Technologies</name>
+        <url>https://mastfrog.com</url>
+    </organization>
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Tim Boudreau</name>
+            <email>tim@timboudreau.com</email>
+            <url>https://timboudreau.com</url>
+        </developer>
+    </developers>
+    <issueManagement>
+        <system>Github</system>
+        <url>https://github.com/timboudreau/bunyan-java-v2/issues</url>
+    </issueManagement>
+</project>
