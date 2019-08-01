@@ -51,7 +51,7 @@ You get a `Logs` instance - a factory for `Log` records, and the equivalent of a
 from a `LoggingConfig` you pass into your code (or injected by Guice if you are
 using `giulius-bunyan-v2`):
 
-```
+```java
 public class MyClass {
    private static final Logs LOGS = Logs.named("my-class");
 
