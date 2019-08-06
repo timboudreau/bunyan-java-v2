@@ -3,8 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.mastfrog</groupId>
-        <artifactId>timeseries-parent</artifactId>
-        <version>0.1</version>
+        <artifactId>mastfrog-parent</artifactId>
+        <version>2.5.1-dev</version>
+        <relativePath/>
     </parent>
     <artifactId>bunyan-java-v2-local-cached-remote-sinks</artifactId>
     <dependencies>
