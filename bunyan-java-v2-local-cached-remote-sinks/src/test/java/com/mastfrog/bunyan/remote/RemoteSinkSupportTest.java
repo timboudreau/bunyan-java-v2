@@ -35,6 +35,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +76,7 @@ public class RemoteSinkSupportTest {
         }
         config.shutdown();
         rss.shutdown();
+        rs.close();
         List<Map<String, Object>> all = readAll();
         Set<String> onDisk = new HashSet<>();
         for (Map<String, Object> m : all) {
@@ -135,7 +137,7 @@ public class RemoteSinkSupportTest {
     static final class RemoteSinkImpl implements RemoteSink {
 
         private final ExecutorService svc = Executors.newSingleThreadExecutor();
-        private final Set<String> msgs = new HashSet<>();
+        private final Set<String> msgs = Collections.synchronizedSet(new HashSet<>());
 
         @Override
         public void open(Consumer<Boolean> whenReady) {
@@ -153,7 +155,9 @@ public class RemoteSinkSupportTest {
 
         @Override
         public void close() throws IOException {
-            svc.shutdown();
+            for (Runnable r : svc.shutdownNow()) {
+                r.run();
+            }
         }
 
     }
