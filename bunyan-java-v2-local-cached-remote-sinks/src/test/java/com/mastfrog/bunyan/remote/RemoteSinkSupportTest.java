@@ -74,6 +74,7 @@ public class RemoteSinkSupportTest {
             });
             assertEquals("x-" + ix, x);
         }
+        Thread.sleep(1000);
         config.shutdown();
         rss.shutdown();
         rs.close();
