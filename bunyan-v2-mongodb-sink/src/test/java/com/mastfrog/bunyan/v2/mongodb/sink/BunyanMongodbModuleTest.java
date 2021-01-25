@@ -36,6 +36,7 @@ import static com.mastfrog.giulius.bunyan.java.v2.LoggingModule.GUICE_BINDING_DE
 import com.mastfrog.giulius.mongodb.async.MongoFutureCollection;
 import com.mastfrog.giulius.mongodb.async.MongoHarness;
 import com.mastfrog.giulius.mongodb.async.TestSupport;
+import com.mastfrog.giulius.tests.IfBinaryAvailable;
 import com.mastfrog.settings.Settings;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -51,6 +52,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Tim Boudreau
  */
+@IfBinaryAvailable("mongod")
 public class BunyanMongodbModuleTest {
 
     Dependencies deps;
@@ -61,6 +63,9 @@ public class BunyanMongodbModuleTest {
 
     @Test
     public void testRecordsAreStored() throws Exception {
+        if (noMongodb) {
+            return;
+        }
         assertNotNull(dlsink);
         foo.error("launched").add("foo", "bar").close();
         bar.error("stuff").add("moo", "cheese").close();
@@ -105,8 +110,16 @@ public class BunyanMongodbModuleTest {
 
         dlsink = deps.getInstance(Key.get(LogSink.class, Names.named(GUICE_BINDING_DEFAULT_SINK)));
         // Init the db
-        records.count().get();
+        try {
+            records.count().get();
+        } catch (Exception ex) {
+            noMongodb = true;
+            System.err.println("Mongodb Startup failed.  No mongod on path?");
+            ex.printStackTrace(System.err);
+        }
     }
+
+    static boolean noMongodb;
 
     @AfterEach
     public void shutdown() throws Exception {
