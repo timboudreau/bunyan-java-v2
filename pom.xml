@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>com.mastfrog</groupId>
         <artifactId>mastfrog-parent</artifactId>
@@ -12,30 +15,26 @@
     <name>Bunyan-Java V2 (modules)</name>
     <packaging>pom</packaging>
     <modules>
+        <module>acteur-bunyan-v2</module>
         <module>bunyan-java-v2</module>
-        <!--
-                <module>acteur-bunyan-java</module>
-                <module>bunyan-parse</module>
-                <module>bunyan-java-mongodb-sink/bunyan-java-mongodb-sink</module>
-                <module>bunyan-java-log4j-appender</module>
-                <module>bunyan-java-util-logging</module>
-                <module>bunyan-log4j2-appender</module>
-        -->
         <module>bunyan-java-v2-local-cached-remote-sinks</module>
         <module>bunyan-v2-mongodb-sink</module>
         <module>giulius-bunyan-java-v2</module>
-        <module>acteur-bunyan-v2</module>
+        <module>bunyan-java-util-logging-v2</module>
     </modules>
     <url>https://github.com/timboudreau/bunyan-java-v2</url>
+
     <scm>
         <url>https://github.com/timboudreau/bunyan-java-v2.git</url>
         <connection>scm:git:https://github.com/timboudreau/bunyan-java-v2.git</connection>
         <developerConnection>git@github.com/timboudreau/bunyan-java-v2.git</developerConnection>
     </scm>
+
     <organization>
         <name>Mastfrog Technologies</name>
         <url>https://mastfrog.com</url>
     </organization>
+
     <licenses>
         <license>
             <name>MIT</name>
@@ -43,6 +42,7 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
     <developers>
         <developer>
             <name>Tim Boudreau</name>
