@@ -25,4 +25,7 @@ open module com.mastfrog.bunyan.v2.mongodb.sink {
     // Inferred from source scan
     requires com.mastfrog.time;
 
+    // Inferred from test-source-scan
+    requires transitive org.junit.jupiter.api;
+
 }

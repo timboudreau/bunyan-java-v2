@@ -26,4 +26,7 @@ open module com.mastfrog.bunyan.java.v2.local.cached.remote.sinks {
     requires com.mastfrog.util.function;
     requires java.logging;
 
+    // Inferred from test-source-scan
+    requires transitive org.junit.jupiter.api;
+
 }

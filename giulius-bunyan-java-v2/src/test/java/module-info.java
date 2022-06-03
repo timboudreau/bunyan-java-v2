@@ -23,7 +23,16 @@ open module com.mastfrog.giulius.bunyan.java.v2 {
     requires com.mastfrog.preconditions;
 
     // Inferred from source scan
+    requires com.mastfrog.streams;
+
+    // Inferred from source scan
     requires com.mastfrog.strings;
+
+    // Inferred from source scan
+    requires com.mastfrog.util.function;
+
+    // Inferred from test-source-scan
+    requires transitive org.junit.jupiter.api;
     provides com.mastfrog.jackson.JacksonConfigurer with
        com.mastfrog.giulius.bunyan.java.v2.JacksonConfig;
 
