@@ -128,11 +128,15 @@ final class LogRecordRouter implements BiFunction<String, LogLevel, LogSink> {
     private final class LazyAsyncLogSink implements LogSink {
 
         private final AtomicReference<LogSink> sink = new AtomicReference<>();
-        @JsonValue
         private final LogSink orig;
 
         public LazyAsyncLogSink(LogSink orig) {
             this.orig = orig;
+        }
+
+        @JsonValue
+        LogSink original() {
+            return orig;
         }
 
         private LogSink sink() {

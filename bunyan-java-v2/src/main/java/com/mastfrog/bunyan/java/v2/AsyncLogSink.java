@@ -18,7 +18,6 @@ class AsyncLogSink implements LogSink, Wrapper<LogSink> {
 
     private final Supplier<LoggingConfig> config;
 
-    @JsonValue
     final LogSink orig;
 
     AsyncLogSink(LoggingConfig config, LogSink orig) {
@@ -28,6 +27,11 @@ class AsyncLogSink implements LogSink, Wrapper<LogSink> {
     AsyncLogSink(Supplier<LoggingConfig> config, LogSink orig) {
         this.config = config;
         this.orig = orig;
+    }
+
+    @JsonValue
+    LogSink original() {
+        return orig;
     }
 
     @Override
