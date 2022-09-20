@@ -24,6 +24,12 @@
         </dependency>
         <dependency>
             <groupId>com.mastfrog</groupId>
+            <artifactId>annotation-processors</artifactId>
+            <scope>provided</scope>
+            <version>${mastfrog.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.mastfrog</groupId>
             <artifactId>jackson</artifactId>
         </dependency>
         <dependency>
