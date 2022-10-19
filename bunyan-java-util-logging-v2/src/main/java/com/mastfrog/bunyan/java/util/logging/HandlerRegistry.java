@@ -24,7 +24,7 @@
 package com.mastfrog.bunyan.java.util.logging;
 
 import com.mastfrog.bunyan.java.v2.Logs;
-import com.mastfrog.giulius.ShutdownHookRegistry;
+import com.mastfrog.shutdown.hooks.ShutdownHookRegistry;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

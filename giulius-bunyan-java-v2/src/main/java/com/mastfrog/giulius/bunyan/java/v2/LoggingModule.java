@@ -35,12 +35,12 @@ import com.google.inject.name.Names;
 import com.mastfrog.bunyan.java.v2.LogSink;
 import com.mastfrog.bunyan.java.v2.LoggingConfig;
 import com.mastfrog.bunyan.java.v2.Logs;
-import com.mastfrog.giulius.ShutdownHookRegistry;
-import com.mastfrog.jackson.DurationSerializationMode;
-import com.mastfrog.jackson.JacksonConfigurer;
 import com.mastfrog.jackson.JacksonModule;
-import com.mastfrog.jackson.TimeSerializationMode;
+import com.mastfrog.jackson.configuration.DurationSerializationMode;
+import com.mastfrog.jackson.configuration.JacksonConfigurer;
+import com.mastfrog.jackson.configuration.TimeSerializationMode;
 import com.mastfrog.settings.Settings;
+import com.mastfrog.shutdown.hooks.ShutdownHookRegistry;
 import com.mastfrog.util.preconditions.ConfigurationError;
 import com.mastfrog.util.strings.Strings;
 import java.io.IOException;
@@ -440,7 +440,7 @@ public final class LoggingModule extends AbstractModule {
                 }
             }
             LoggingConfig result = b.build();
-            reg.add((AutoCloseable) result::shutdown);
+            reg.addResource(result);
             return config = result;
         }
     }

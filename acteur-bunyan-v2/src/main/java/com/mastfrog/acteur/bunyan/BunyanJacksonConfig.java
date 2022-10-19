@@ -14,7 +14,7 @@ import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.util.RequestID;
-import com.mastfrog.jackson.JacksonConfigurer;
+import com.mastfrog.jackson.configuration.JacksonConfigurer;
 import com.mastfrog.url.Path;
 import com.mastfrog.url.URL;
 import com.mastfrog.util.strings.Strings;

@@ -43,10 +43,11 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
+ * Configuration for bunyan-v2 logging. Implements AutoClosable for shutdown.
  *
  * @author Tim Boudreau
  */
-public final class LoggingConfig {
+public final class LoggingConfig implements AutoCloseable {
 
     /**
      * For use with <code>LoggingConfig.fromSystemProperties()</code> or
@@ -407,9 +408,17 @@ public final class LoggingConfig {
         try {
             logQueue.run();
         } finally {
-            onShutdown.toRunnable().run();
+            onShutdown.toNonThrowing().run();
             DelayedDelegationLogs.onConfigShutdown(this);
         }
+    }
+
+    /**
+     * Implementation of AutoCloseable delegating to shutdown().
+     */
+    @Override
+    public void close() {
+        shutdown();
     }
 
     public synchronized void onShutdown(ThrowingRunnable run) {
@@ -457,7 +466,7 @@ public final class LoggingConfig {
                 } else {
                     if (Files.isReadable(path)) {
                         Properties props = new Properties();
-                        try (InputStream in = Files.newInputStream(path, StandardOpenOption.READ)) {
+                        try ( InputStream in = Files.newInputStream(path, StandardOpenOption.READ)) {
                             props.load(in);
                         } catch (IOException ex) {
                             LoggingLogging.log("Exception loading config file specified in "
@@ -538,11 +547,11 @@ public final class LoggingConfig {
                     break;
                 default:
                     try {
-                        priority = Integer.parseInt(priorityString);
-                    } catch (NumberFormatException e) {
-                        LoggingLogging.log(true, "Thread priority is not a number or constant: '" + priorityString + "'");
-                        priority = Thread.NORM_PRIORITY;
-                    }
+                    priority = Integer.parseInt(priorityString);
+                } catch (NumberFormatException e) {
+                    LoggingLogging.log(true, "Thread priority is not a number or constant: '" + priorityString + "'");
+                    priority = Thread.NORM_PRIORITY;
+                }
             }
             b.asyncLoggingThreadPriority(priority);
         }

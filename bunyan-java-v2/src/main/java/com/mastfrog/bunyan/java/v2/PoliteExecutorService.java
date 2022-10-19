@@ -25,8 +25,8 @@ package com.mastfrog.bunyan.java.v2;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mastfrog.util.collections.AtomicLinkedQueue;
 import static com.mastfrog.util.preconditions.Checks.greaterThanZero;
-import com.mastfrog.util.thread.AtomicLinkedQueue;
 import com.mastfrog.util.thread.OneThreadLatch;
 import java.util.Collection;
 import java.util.Collections;

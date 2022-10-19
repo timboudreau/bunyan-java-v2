@@ -2,7 +2,7 @@ package com.mastfrog.bunyan.java.util.logging;
 
 import com.mastfrog.bunyan.java.v2.Log;
 import com.mastfrog.bunyan.java.v2.Logs;
-import com.mastfrog.util.thread.AtomicLinkedQueue;
+import com.mastfrog.util.collections.AtomicLinkedQueue;
 import java.text.MessageFormat;
 import java.time.Instant;
 import java.util.List;

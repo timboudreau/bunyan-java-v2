@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.mastfrog.jackson.JacksonConfigurer;
+import com.mastfrog.jackson.configuration.JacksonConfigurer;
 import com.mastfrog.util.service.ServiceProvider;
 import java.io.IOException;
 import javax.inject.Singleton;

@@ -43,7 +43,7 @@ import com.mastfrog.acteurbase.ActeurState;
 import com.mastfrog.bunyan.java.v2.Log;
 import com.mastfrog.bunyan.java.v2.Logs;
 import com.mastfrog.giulius.bunyan.java.v2.LoggingModule;
-import com.mastfrog.jackson.JacksonConfigurer;
+import com.mastfrog.jackson.configuration.JacksonConfigurer;
 import com.mastfrog.util.preconditions.Exceptions;
 import static com.mastfrog.util.collections.CollectionUtils.map;
 import io.netty.handler.codec.http.HttpResponseStatus;

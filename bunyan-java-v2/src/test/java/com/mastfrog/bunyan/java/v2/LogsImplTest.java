@@ -15,11 +15,11 @@ import static com.mastfrog.bunyan.java.v2.LoggingConfig.PROP_VALUE_JSON_SERIALIZ
 import static com.mastfrog.bunyan.java.v2.LoggingConfig.PROP_VALUE_JSON_SERIALIZATION_POLICY_NEVER_JACKSON;
 import static com.mastfrog.bunyan.java.v2.LoggingConfig.PROP_VALUE_TAKE_OVER_AS_DEFAULT_CONFIG;
 import static com.mastfrog.bunyan.java.v2.LoggingConfig.PROP_VALUE_USE_AS_DEFAULT_CONFIG_IF_UNSET;
+import com.mastfrog.util.collections.AtomicLinkedQueue;
 import com.mastfrog.util.collections.CollectionUtils;
 import static com.mastfrog.util.collections.CollectionUtils.map;
 import com.mastfrog.util.file.FileUtils;
 import com.mastfrog.util.preconditions.Exceptions;
-import com.mastfrog.util.thread.AtomicLinkedQueue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
