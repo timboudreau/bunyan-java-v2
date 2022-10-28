@@ -21,22 +21,13 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>bunyan-java-v2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>giulius-bunyan-java-v2</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>acteur</artifactId>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>injection-reflection-indexer</artifactId>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
+        </dependencies>
     <issueManagement>
         <system>Github</system>
         <url>https://github.com/timboudreau/bunyan-java-v2/issues</url>

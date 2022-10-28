@@ -16,16 +16,21 @@
 
     <artifactId>bunyan-v2-mongodb-sink</artifactId>
 
+    <properties>
+        <enforcer.skip>true</enforcer.skip>
+    </properties>
+
     <dependencies>
 
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>bson</artifactId>
+            <version>${mongo.driver.version}</version>
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>giulius-bunyan-java-v2</artifactId>
             <version>${mastfrog.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>giulius-mongodb-async</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
