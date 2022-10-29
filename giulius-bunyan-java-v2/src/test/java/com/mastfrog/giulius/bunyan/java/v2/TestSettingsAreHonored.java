@@ -36,6 +36,7 @@ import com.mastfrog.util.file.FileUtils;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,6 +85,14 @@ public class TestSettingsAreHonored {
         b = FileUtils.newTempFile("TestSettingsAreHonored-2-");
         c = FileUtils.newTempFile("TestSettingsAreHonored-3-");
         d = FileUtils.newTempFile("TestSettingsAreHonored-4-");
+    }
+
+    @AfterEach
+    public void deleteTempFiles() throws Exception {
+        FileUtils.deleteIfExists(a);
+        FileUtils.deleteIfExists(b);
+        FileUtils.deleteIfExists(c);
+        FileUtils.deleteIfExists(d);
     }
 
     private void checkOne(String path, Object expectedValue, SettingsBuilder sb, boolean expectNull) throws IOException {
