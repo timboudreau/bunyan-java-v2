@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright 2019 Mastfrog Technologies.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.mastfrog.bunyan.java.v2;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,6 +51,7 @@ import com.mastfrog.util.preconditions.Exceptions;
 import com.mastfrog.util.strings.Strings;
 import java.io.IOException;
 import java.io.InputStream;
+import static java.lang.Math.max;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -213,6 +237,9 @@ public final class LoggingConfig implements AutoCloseable {
     public static final String PROP_VALUE_TAKE_OVER_AS_DEFAULT_CONFIG = "take-over";
 
     public static final String PROP_ESCALATE_ON_ERROR = "bunyan-v2-logging-escalate-errors";
+    public static final String PROP_USE_SHUTDOWN_HOOK = "bunyan-v2-shutdown-hook";
+
+    public static final String PROP_LOG_ROTATION_MAX_SIZE_MB = "bunyan-v2-log-rotation-size-mb";
 
     @JsonProperty("minLevel")
     private final int minLevel;
@@ -241,7 +268,7 @@ public final class LoggingConfig implements AutoCloseable {
             boolean recordCaller, int asyncThreads,
             DefaultLoggingConfigHandling defaultHandling, int asyncThreadPriority,
             JsonSerializationPolicy jsonPolicy, String hostname,
-            boolean escalateOnError) {
+            boolean escalateOnError, boolean useShutdownHook) {
         this._mapper = mapper.copy();
         this._mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS,
                 SerializationFeature.FAIL_ON_SELF_REFERENCES,
@@ -255,8 +282,10 @@ public final class LoggingConfig implements AutoCloseable {
         this.onShutdown = onShutdown;
         this.decorator = !recordCaller ? decorator
                 : decorator == null ? new RecordCallerDecorator() : decorator.andThen(new RecordCallerDecorator());
-        this.logQueue = new AsyncLogQueue(asyncThreads, asyncThreadPriority);
-        HookThread.add(this);
+        this.logQueue = new AsyncLogQueue(asyncThreads, asyncThreadPriority, useShutdownHook);
+        if (useShutdownHook) {
+            HookThread.add(this);
+        }
         if (defaultHandling.isSetIt()) {
             DelayedDelegationLogs.setGlobalLoggingConfig(this, defaultHandling.isForce());
         }
@@ -406,7 +435,7 @@ public final class LoggingConfig implements AutoCloseable {
      */
     public final void shutdown() {
         try {
-            logQueue.run();
+            logQueue.shutdown();
         } finally {
             onShutdown.toNonThrowing().run();
             DelayedDelegationLogs.onConfigShutdown(this);
@@ -466,7 +495,7 @@ public final class LoggingConfig implements AutoCloseable {
                 } else {
                     if (Files.isReadable(path)) {
                         Properties props = new Properties();
-                        try ( InputStream in = Files.newInputStream(path, StandardOpenOption.READ)) {
+                        try (InputStream in = Files.newInputStream(path, StandardOpenOption.READ)) {
                             props.load(in);
                         } catch (IOException ex) {
                             LoggingLogging.log("Exception loading config file specified in "
@@ -526,6 +555,23 @@ public final class LoggingConfig implements AutoCloseable {
         } else if ("false".equals(props.getProperty(PROP_ESCALATE_ON_ERROR))) {
             b.dontEscalateOnError();
         }
+        if ("true".equals(props.getProperty(PROP_USE_SHUTDOWN_HOOK))) {
+            b.useShutdownHook();
+        } else {
+            b.dontUseShutdownHook();
+        }
+
+        String rotateAfter = props.getProperty(PROP_LOG_ROTATION_MAX_SIZE_MB);
+        long rotationMaxSize = -1;
+        if (rotateAfter != null) {
+            try {
+                rotationMaxSize = Long.parseLong(rotateAfter);
+            } catch (NumberFormatException nfe) {
+                LoggingLogging.log("Log rotation max size not parseable: "
+                        + rotateAfter + " for " + PROP_LOG_ROTATION_MAX_SIZE_MB, nfe);
+            }
+        }
+
         if (props.containsKey(PROP_ASYNC_LOGGING_THREAD_PRIORITY)) {
             String priorityString = props.getProperty(PROP_ASYNC_LOGGING_THREAD_PRIORITY);
             int priority;
@@ -733,6 +779,23 @@ public final class LoggingConfig implements AutoCloseable {
         private JsonSerializationPolicy jsonSerializationPolicy = JsonSerializationPolicy.ADAPTIVE;
         private String hostname;
         private boolean escalateOnError = true;
+        private boolean useShutdownHook = true;
+        private long rotateFilesAboveMb = -1;
+
+        public Builder fileRotationThresholdMegabytes(long val) {
+            rotateFilesAboveMb = val;
+            return this;
+        }
+
+        public Builder dontUseShutdownHook() {
+            useShutdownHook = false;
+            return this;
+        }
+
+        public Builder useShutdownHook() {
+            useShutdownHook = true;
+            return this;
+        }
 
         public Builder dontEscalateOnError() {
             escalateOnError = false;
@@ -895,9 +958,18 @@ public final class LoggingConfig implements AutoCloseable {
             mapperConsumer.accept(mapperLocal);
             BiPredicate<String, LogLevel> specificConfig = new LevelConfig(minLogLevelForLogger, dll.minimum);
             LogSink fallback = defaultLogSink;
+            long rotateFilesAboveBytes = max(0L, rotateFilesAboveMb * 1024 * 1024);
             if (defaultLogFile != null) {
-                FileLogSink files = new FileLogSink(defaultLogFile, configSupplier);
-                onShutdown.andAlways(files);
+                LogSink files;
+                if (rotateFilesAboveBytes <= 0) {
+                    FileLogSink fs = new FileLogSink(defaultLogFile, configSupplier);
+                    onShutdown.andAlways(fs);
+                    files = fs;
+                } else {
+                    FileRotationLogSink fr = new FileRotationLogSink(rotateFilesAboveBytes, defaultLogFile, configSupplier);
+                    files = fr;
+                    onShutdown.andAlways(fr);
+                }
                 fallback = fallback == null ? files
                         : fallback.and(files);
                 if (console != null && console) {
@@ -909,12 +981,12 @@ public final class LoggingConfig implements AutoCloseable {
             }
             LogRecordRouter sp = new LogRecordRouter(
                     minLogLevelForLogger, logFileForLogger, fallback, async, onShutdown, logSinkForLogName,
-                    logPathForSevere, logSinkForSevere, configSupplier);
+                    logPathForSevere, logSinkForSevere, configSupplier, rotateFilesAboveBytes);
 
             LoggingConfig result = new LoggingConfig(mapperLocal, dll.minimum,
                     specificConfig, sp, onShutdown, decorator, recordCaller, asyncThreads,
                     defaultConfigReplacementPolicy, asyncThreadPriority,
-                    jsonSerializationPolicy, hostname, escalateOnError);
+                    jsonSerializationPolicy, hostname, escalateOnError, useShutdownHook);
             configSupplier.config = result;
             return result;
         }

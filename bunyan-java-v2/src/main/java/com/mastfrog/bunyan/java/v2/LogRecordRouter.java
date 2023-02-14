@@ -63,6 +63,8 @@ final class LogRecordRouter implements BiFunction<String, LogLevel, LogSink> {
     private final Supplier<LoggingConfig> configSupplier;
     @JsonProperty("routes")
     private final Map<String, Path> pathForLogger;
+    @JsonProperty("rotateFilesAboveBytes")
+    private final long rotateFilesAboveBytes;
 
     public LogRecordRouter(
             Map<String, LogLevel> minLogLevelForLogger,
@@ -70,8 +72,10 @@ final class LogRecordRouter implements BiFunction<String, LogLevel, LogSink> {
             boolean async, ThrowingRunnable onShutdown,
             Map<String, LogSink> logSinkForLogName,
             Path logPathForSevere, LogSink logSinkForSevere,
-            Supplier<LoggingConfig> configSupplier) {
+            Supplier<LoggingConfig> configSupplier,
+            long rotateFilesAboveBytes) {
         this.minLogLevelForLogger = minLogLevelForLogger;
+        this.rotateFilesAboveBytes = rotateFilesAboveBytes;
         this.defaultSink = defaultSink;
         this.onShutdown = onShutdown;
         this.configSupplier = configSupplier;
@@ -81,8 +85,13 @@ final class LogRecordRouter implements BiFunction<String, LogLevel, LogSink> {
         this.pathForLogger = pathForLogger;
         this.async = async;
         logFileForLogger = AtomicConversionMap.create(pathForLogger, (p) -> {
-            LogSink result = new FileLogSink(p, configSupplier);
-            onShutdown.andAlways((FileLogSink) result);
+            LogSink result;
+            if (rotateFilesAboveBytes > 0) {
+                result = new FileRotationLogSink(rotateFilesAboveBytes, p, configSupplier);
+            } else {
+                result = new FileLogSink(p, configSupplier);
+            }
+            onShutdown.andAlways((ThrowingRunnable) result);
             if (async) {
                 result = configSupplier.get().toAsyncLogSink(result);
             }
@@ -168,8 +177,13 @@ final class LogRecordRouter implements BiFunction<String, LogLevel, LogSink> {
                     sev = logSinkForSevere;
                 }
                 if (logPathForSevere != null) {
-                    FileLogSink sink = new FileLogSink(logPathForSevere, configSupplier);
-                    onShutdown.andAlways(sink);
+                    LogSink sink;
+                    if (rotateFilesAboveBytes > 0) {
+                        sink = new FileRotationLogSink(rotateFilesAboveBytes, logPathForSevere, configSupplier);
+                    } else {
+                        sink = new FileLogSink(logPathForSevere, configSupplier);
+                    }
+                    onShutdown.andAlways((ThrowingRunnable) sink);
                     if (sev == null) {
                         sev = sink;
                     } else {

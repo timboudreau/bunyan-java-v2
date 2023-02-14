@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import com.mastfrog.bunyan.java.v2.LogSink;
@@ -49,6 +50,7 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import javax.inject.Provider;
 
 /**
@@ -103,6 +105,12 @@ public final class LoggingModule extends AbstractModule {
     public static final String SETTINGS_VALUE_TAKE_OVER_DEFAULT_CONFIG = LoggingConfig.PROP_VALUE_TAKE_OVER_AS_DEFAULT_CONFIG;
 
     public static final String SETTINGS_KEY_ESCALATE_ON_ERRORS = "log.escalate.errors";
+
+    /**
+     * Settings key to configure log file rotation.
+     */
+    public static final String SETTINGS_KEY_ROTATE_FILES_MB = "log.rotation.mb";
+
     /**
      * Name used by the Named annotation to identify the ObjectMapper that will
      * be injected into loggers. If unusual objects are to be serialized into
@@ -118,6 +126,8 @@ public final class LoggingModule extends AbstractModule {
     private final JacksonModule jacksonModule;
     private boolean dontBindLoggingConfig = false;
     private boolean dontConfigurePathSerialization;
+    private Consumer<LoggingConfig.Builder> additionalConfigurer = lcb -> {
+    };
 
     public LoggingModule() {
         this(true);
@@ -125,6 +135,11 @@ public final class LoggingModule extends AbstractModule {
 
     public LoggingModule dontBindLoggingConfig() {
         dontBindLoggingConfig = true;
+        return this;
+    }
+
+    public LoggingModule configuringLoggingWith(Consumer<LoggingConfig.Builder> c) {
+        this.additionalConfigurer = additionalConfigurer.andThen(c);
         return this;
     }
 
@@ -211,6 +226,8 @@ public final class LoggingModule extends AbstractModule {
         if (!dontConfigurePathSerialization) {
             jacksonModule.withConfigurer(new JC());
         }
+        bind(new TypeLiteral<Consumer<LoggingConfig.Builder>>() {
+        }).toInstance(additionalConfigurer);
         loggers.forEach((s) -> {
             bind(Logs.class).annotatedWith(Names.named(s))
                     .toProvider(new LogsProvider(s, binder().getProvider(LoggingConfig.class)));
@@ -240,27 +257,6 @@ public final class LoggingModule extends AbstractModule {
         }
     }
 
-//    static final class DefaultLogSinkProvider implements Provider<AbstractLogSink> {
-//
-//        private @Inject(optional = true)
-//        @Named(GUICE_BINDING_DEFAULT_SINK)
-//        AbstractLogSink defaultSink;
-//        private final LogSink lazyDelegator;
-//
-//        @Inject
-//        DefaultLogSinkProvider(Provider<LoggingConfig> config) {
-//            lazyDelegator = AbstractLogSink.lazy(config::get, this::defaultSink);
-//        }
-//
-//        AbstractLogSink defaultSink() {
-//            return defaultSink;
-//        }
-//
-//        @Override
-//        public AbstractLogSink get() {
-//            return lazyDelegator;
-//        }
-//    }
     static final class LoggingConfigProvider implements Provider<LoggingConfig> {
 
         private final Settings settings;
@@ -270,13 +266,16 @@ public final class LoggingModule extends AbstractModule {
         @Inject(optional = true)
         private @Named(GUICE_BINDING_DEFAULT_SINK)
         Provider<LogSink> delegatingDefaultSink;
+        private final Consumer<LoggingConfig.Builder> builderConsumer;
 
         @Inject
-        public LoggingConfigProvider(Settings settings, ShutdownHookRegistry reg,
-                @Named(GUICE_BINDING_OBJECT_MAPPER) ObjectMapper mapper) {
+        LoggingConfigProvider(Settings settings, ShutdownHookRegistry reg,
+                @Named(GUICE_BINDING_OBJECT_MAPPER) ObjectMapper mapper,
+                Consumer<LoggingConfig.Builder> builderConsumer) {
             this.settings = settings;
             this.reg = reg;
             this.mapper = mapper;
+            this.builderConsumer = builderConsumer;
         }
 
         @Override
@@ -285,7 +284,8 @@ public final class LoggingModule extends AbstractModule {
                 return config;
             }
             LoggingConfig.Builder b = LoggingConfig
-                    .builder().withObjectMapper(mapper);
+                    .builder().withObjectMapper(mapper)
+                    .dontUseShutdownHook();
             if (delegatingDefaultSink != null) {
                 LogSink defaultSink = delegatingDefaultSink.get();
                 if (delegatingDefaultSink != null) {
@@ -324,6 +324,17 @@ public final class LoggingModule extends AbstractModule {
                     b.dontEscalateOnError();
                 }
             }
+
+            String rot = settings.getString(SETTINGS_KEY_ROTATE_FILES_MB);
+            if (rot != null) {
+                try {
+                    b.fileRotationThresholdMegabytes(Long.parseLong(rot.trim()));
+                } catch (NumberFormatException nfe) {
+                    System.err.println("Bad value for " + SETTINGS_KEY_ROTATE_FILES_MB + ": " + rot);
+                    nfe.printStackTrace();
+                }
+            }
+
             String routedLogs = settings.getString(SETTINGS_KEY_ROUTED_LOGS);
             if (routedLogs != null) {
                 Set<CharSequence> all = Strings.splitUniqueNoEmpty(',', routedLogs);
@@ -439,8 +450,9 @@ public final class LoggingModule extends AbstractModule {
                                 + configPolicy + "'");
                 }
             }
+            builderConsumer.accept(b);
             LoggingConfig result = b.build();
-            reg.addResource(result);
+            reg.addResourceLast(result);
             return config = result;
         }
     }

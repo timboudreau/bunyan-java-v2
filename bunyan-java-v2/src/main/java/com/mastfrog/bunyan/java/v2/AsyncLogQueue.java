@@ -39,13 +39,15 @@ final class AsyncLogQueue implements Runnable {
     private final ExecutorService svc;
 
     AsyncLogQueue() {
-        this(3, Thread.currentThread().getPriority() - 1);
+        this(3, Thread.currentThread().getPriority() - 1, true);
     }
 
-    AsyncLogQueue(int threads, int priority) {
+    AsyncLogQueue(int threads, int priority, boolean useShutdownHook) {
         svc = new PoliteExecutorService(greaterThanZero("threads", threads),
                 greaterThanZero("priority", priority));
-        Runtime.getRuntime().addShutdownHook(new Thread(this, "async-log-shutdown"));
+        if (useShutdownHook) {
+            Runtime.getRuntime().addShutdownHook(new Thread(this, "async-log-shutdown"));
+        }
     }
 
     void run(Runnable toRun) {
@@ -62,11 +64,21 @@ final class AsyncLogQueue implements Runnable {
         });
     }
 
-    @Override
-    public void run() {
+    boolean shutdown() {
         if (!svc.isShutdown()) {
-            svc.shutdown();
+            for (Runnable r : svc.shutdownNow()) {
+                try {
+                    r.run();
+                } catch (Exception | Error e) {
+                    LoggingLogging.log(e);
+                }
+            }
+            return true;
         }
+        return false;
+    }
+
+    void awaitExit() {
         if (!svc.isTerminated()) {
             try {
                 svc.awaitTermination(10, TimeUnit.SECONDS);
@@ -74,5 +86,13 @@ final class AsyncLogQueue implements Runnable {
                 LoggingLogging.log("Interrupted awaiting termination", ex);
             }
         }
+    }
+
+    @Override
+    public void run() {
+        if (!svc.isShutdown()) {
+            svc.shutdown();
+        }
+        awaitExit();
     }
 }
