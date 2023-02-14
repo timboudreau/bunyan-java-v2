@@ -90,7 +90,7 @@ public class FolderLogStreamFactory implements StreamFactory {
             streams.add(ls.stream());
         }
 
-        return Streams.concat(streams.toArray(Stream[]::new));
+        return Streams.concat(streams.toArray(new Stream[0]));
     }
 
     @Override
@@ -103,6 +103,6 @@ public class FolderLogStreamFactory implements StreamFactory {
             LogStreamFactory ls = new LogStreamFactory(p, mapper);
             streams.add(ls.convertedStream(pred, type));
         }
-        return Streams.concat(streams.toArray(Stream[]::new));
+        return Streams.concat(streams.toArray(new Stream[0]));
     }
 }
