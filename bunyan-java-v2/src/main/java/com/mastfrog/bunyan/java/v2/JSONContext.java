@@ -23,9 +23,10 @@
  */
 package com.mastfrog.bunyan.java.v2;
 
-import com.mastfrog.bunyan.java.v2.LoggingConfig.JsonSerializationPolicy;
+import static com.mastfrog.bunyan.java.v2.LoggingConfig.JsonSerializationPolicy.ALWAYS_JACKSON;
+import static com.mastfrog.bunyan.java.v2.LoggingConfig.JsonSerializationPolicy.NEVER_JACKSON;
 import com.mastfrog.util.fileformat.SimpleJSON;
-import com.mastfrog.util.fileformat.SimpleJSON.Style;
+import static com.mastfrog.util.fileformat.SimpleJSON.Style.COMPACT;
 import java.io.IOException;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -43,7 +44,7 @@ public class JSONContext implements JSONEncoder {
 
     public JSONContext(LoggingConfig config) {
         this.config = config;
-        simpleJsonSafe = config.serializationPolicy() != JsonSerializationPolicy.ALWAYS_JACKSON;
+        simpleJsonSafe = config.serializationPolicy() != ALWAYS_JACKSON;
     }
 
     void clear() {
@@ -53,7 +54,7 @@ public class JSONContext implements JSONEncoder {
 
     <T> T check(T o) {
         if (simpleJsonSafe) {
-            if (config.serializationPolicy() == JsonSerializationPolicy.NEVER_JACKSON) {
+            if (config.serializationPolicy() == NEVER_JACKSON) {
                 return o;
             }
             simpleJsonSafe = SimpleJSON.canDefinitelySerialize(o);
@@ -85,7 +86,7 @@ public class JSONContext implements JSONEncoder {
             return result;
         }
         if (simpleJsonSafe) {
-            cachedString = SimpleJSON.stringify(o, Style.COMPACT);
+            cachedString = SimpleJSON.stringify(o, COMPACT);
             result = cachedString.getBytes(UTF_8);
         } else {
             result = config._mapper().writeValueAsBytes(o);

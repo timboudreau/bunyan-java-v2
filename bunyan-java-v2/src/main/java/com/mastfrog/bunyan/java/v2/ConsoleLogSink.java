@@ -25,6 +25,7 @@ package com.mastfrog.bunyan.java.v2;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -34,10 +35,17 @@ import java.util.function.Supplier;
 final class ConsoleLogSink extends AbstractLogSink {
 
     private final boolean disabled;
+    private final Consumer<? super CharSequence> output;
 
-    public ConsoleLogSink(Supplier<LoggingConfig> configSupplier) {
+    ConsoleLogSink(Supplier<LoggingConfig> configSupplier, Consumer<? super CharSequence> output) {
         super(configSupplier);
         disabled = Boolean.getBoolean("disable.console.logger"); // for tests
+        this.output = output;
+
+    }
+
+    ConsoleLogSink(Supplier<LoggingConfig> configSupplier) {
+        this(configSupplier, System.out::println);
     }
 
     @Override
@@ -54,7 +62,7 @@ final class ConsoleLogSink extends AbstractLogSink {
         try {
             CharSequence result = ctx.writeValueAsString(logrecord);
             assert result != null : ctx + " returned null for " + logrecord;
-            System.out.println(result);
+            output.accept(result);
         } catch (Exception ex) {
             LoggingLogging.log("Exception writing json", ex, true);
         }

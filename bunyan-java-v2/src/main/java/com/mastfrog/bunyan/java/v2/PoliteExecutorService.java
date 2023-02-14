@@ -60,7 +60,6 @@ class PoliteExecutorService implements ExecutorService {
     @JsonIgnore
     private final AtomicBoolean shutdown = new AtomicBoolean();
     @JsonIgnore
-//    private final ResettableCountDownLatch latch = new ResettableCountDownLatch(1);
     private final OneThreadLatch latch = new OneThreadLatch();
     @JsonIgnore
     private final CountDownLatch allThreadsExitedLatch;

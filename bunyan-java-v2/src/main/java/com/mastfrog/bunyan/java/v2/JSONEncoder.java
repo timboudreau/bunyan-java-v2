@@ -25,6 +25,7 @@ package com.mastfrog.bunyan.java.v2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mastfrog.util.fileformat.SimpleJSON;
+import static com.mastfrog.util.fileformat.SimpleJSON.Style.COMPACT;
 import java.io.IOException;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -38,10 +39,10 @@ public interface JSONEncoder {
         return writeValueAsString(o).toString().getBytes(UTF_8);
     }
 
-    public CharSequence writeValueAsString(Object o) throws IOException;
+    CharSequence writeValueAsString(Object o) throws IOException;
 
     public static JSONEncoder SIMPLE = (Object o) -> {
-        return SimpleJSON.stringify(o, SimpleJSON.Style.COMPACT);
+        return SimpleJSON.stringify(o, COMPACT);
     };
 
     public static JSONEncoder jackson(ObjectMapper mapper) {
