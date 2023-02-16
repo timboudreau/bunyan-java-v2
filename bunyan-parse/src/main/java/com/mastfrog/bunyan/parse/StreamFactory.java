@@ -72,7 +72,13 @@ public interface StreamFactory {
     }
 
     public static StreamFactory forPath(Path path, ObjectMapper mapper, String fileExt, boolean recursive) {
-        return forPath(path, mapper, pth -> pth.getFileName().toString().toLowerCase().endsWith(fileExt.toLowerCase()), recursive);
+        String ext;
+        if (fileExt == null) {
+            ext = ".log";
+        } else {
+            ext = fileExt.length() > 0 && fileExt.charAt(0) == '.' ? fileExt : "." + fileExt;
+        }
+        return forPath(path, mapper, pth -> pth.getFileName().toString().toLowerCase().endsWith(ext.toLowerCase()), recursive);
     }
 
     public static StreamFactory forPath(Path path, ObjectMapper mapper, Predicate<Path> fileMatcher, boolean recursive) {
