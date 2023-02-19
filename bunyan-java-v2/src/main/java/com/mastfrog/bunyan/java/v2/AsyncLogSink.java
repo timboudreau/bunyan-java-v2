@@ -78,6 +78,9 @@ class AsyncLogSink implements LogSink, Wrapper<LogSink> {
         LoggingConfig config = null;
         if (orig instanceof AbstractLogSink) {
             config = ((AbstractLogSink) orig).configSupplier().get();
+            if (config == null) {
+                config = DelayedDelegationLogs.config;
+            }
         } else {
             config = DelayedDelegationLogs.config;
         }

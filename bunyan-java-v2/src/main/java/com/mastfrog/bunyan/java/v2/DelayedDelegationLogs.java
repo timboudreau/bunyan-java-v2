@@ -44,7 +44,7 @@ class DelayedDelegationLogs implements Logs {
     static LoggingConfig config;
     final String name;
     private volatile Logs delegate;
-    private Set<PreConfigCachingLog> pending = new CopyOnWriteArraySet<>();
+    private final Set<PreConfigCachingLog> pending = new CopyOnWriteArraySet<>();
     private static volatile int pendingLogCount;
     private static final int DEFAULT_INIT_THRESHOLD;
 

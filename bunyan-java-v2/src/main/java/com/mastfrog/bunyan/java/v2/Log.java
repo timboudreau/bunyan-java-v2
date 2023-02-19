@@ -53,6 +53,8 @@ import java.util.function.Supplier;
  * @author Tim Boudreau
  */
 public interface Log extends AutoCloseable {
+    
+    public static final Log NO_OP = new NoOpLog();
 
     /**
      * Set the message for this log record. Additional strings passed to this
