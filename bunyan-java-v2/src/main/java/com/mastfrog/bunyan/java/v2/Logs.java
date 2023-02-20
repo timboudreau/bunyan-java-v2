@@ -23,6 +23,12 @@
  */
 package com.mastfrog.bunyan.java.v2;
 
+import static com.mastfrog.bunyan.java.v2.Level.DEBUG;
+import static com.mastfrog.bunyan.java.v2.Level.ERROR;
+import static com.mastfrog.bunyan.java.v2.Level.FATAL;
+import static com.mastfrog.bunyan.java.v2.Level.INFO;
+import static com.mastfrog.bunyan.java.v2.Level.TRACE;
+import static com.mastfrog.bunyan.java.v2.Level.WARN;
 import com.mastfrog.function.throwing.ThrowingFunction;
 import com.mastfrog.util.preconditions.Exceptions;
 import java.util.Map;
@@ -551,8 +557,31 @@ public interface Logs {
         }
     }
 
+    default <E extends Exception, R> R ttrace(ThrowingLogFunction<E, R> throwingConsumer) throws E {
+        try (Log log = trace()) {
+            try {
+                return throwingConsumer.apply(log);
+            } catch (Exception e) {
+                log.add(e);
+                return Exceptions.chuck(e);
+            }
+        }
+    }
+
     default <R> R info(String msg, Function<Log, R> c) {
         try (Log log = info()) {
+            log.message(msg);
+            try {
+                return c.apply(log);
+            } catch (Exception e) {
+                log.add(e);
+                return Exceptions.chuck(e);
+            }
+        }
+    }
+
+    default <R> R trace(String msg, Function<Log, R> c) {
+        try (Log log = trace()) {
             log.message(msg);
             try {
                 return c.apply(log);
@@ -863,4 +892,196 @@ public interface Logs {
             }
         }
     }
+
+    default Log log(Level level) {
+        switch (level) {
+            case DEBUG:
+                return debug();
+            case ERROR:
+                return error();
+            case FATAL:
+                return fatal();
+            case INFO:
+                return info();
+            case TRACE:
+                return trace();
+            case WARN:
+                return warn();
+            default:
+                throw new AssertionError(level);
+        }
+    }
+
+    default Log log(String msg, Level level) {
+        switch (level) {
+            case DEBUG:
+                return debug(msg);
+            case ERROR:
+                return error(msg);
+            case FATAL:
+                return fatal(msg);
+            case INFO:
+                return info(msg);
+            case TRACE:
+                return trace(msg);
+            case WARN:
+                return warn(msg);
+            default:
+                throw new AssertionError(level);
+        }
+    }
+
+    default <R> R log(String msg, Level level, Function<Log, R> c) {
+        switch (level) {
+            case DEBUG:
+                return debug(msg, c);
+            case ERROR:
+                return error(msg, c);
+            case FATAL:
+                return fatal(msg, c);
+            case INFO:
+                return info(msg, c);
+            case TRACE:
+                return trace(msg, c);
+            case WARN:
+                return warn(msg, c);
+            default:
+                throw new AssertionError(level);
+        }
+    }
+
+    default Logs log(String msg, Level level, Consumer<Log> c) {
+        switch (level) {
+            case DEBUG:
+                return debug(msg, c);
+            case ERROR:
+                return error(msg, c);
+            case FATAL:
+                return fatal(msg, c);
+            case INFO:
+                return info(msg, c);
+            case TRACE:
+                return trace(msg, c);
+            case WARN:
+                return warn(msg, c);
+            default:
+                throw new AssertionError(level);
+        }
+    }
+
+    default <E extends Exception> Logs tlog(String msg, Level level, ThrowingLogConsumer<E> c) throws E {
+        switch (level) {
+            case DEBUG:
+                return tdebug(msg, c);
+            case ERROR:
+                return terror(msg, c);
+            case FATAL:
+                return tfatal(msg, c);
+            case INFO:
+                return tinfo(msg, c);
+            case TRACE:
+                return ttrace(msg, c);
+            case WARN:
+                return twarn(msg, c);
+            default:
+                throw new AssertionError(level);
+        }
+    }
+
+    default <E extends Exception, R> R log(String msg, Level level, ThrowingLogFunction<E, R> c) throws E {
+        switch (level) {
+            case DEBUG:
+                return tdebug(msg, c);
+            case ERROR:
+                return terror(msg, c);
+            case FATAL:
+                return tfatal(msg, c);
+            case INFO:
+                return tinfo(msg, c);
+            case TRACE:
+                return ttrace(msg, c);
+            case WARN:
+                return twarn(msg, c);
+            default:
+                throw new AssertionError(level);
+        }
+
+    }
+
+    default <R> R log(Level level, Function<Log, R> c) {
+        switch (level) {
+            case DEBUG:
+                return debug(c);
+            case ERROR:
+                return error(c);
+            case FATAL:
+                return fatal(c);
+            case INFO:
+                return info(c);
+            case TRACE:
+                return trace(c);
+            case WARN:
+                return warn(c);
+            default:
+                throw new AssertionError(level);
+        }
+    }
+
+    default Logs log(Level level, Consumer<Log> c) {
+        switch (level) {
+            case DEBUG:
+                return debug(c);
+            case ERROR:
+                return error(c);
+            case FATAL:
+                return fatal(c);
+            case INFO:
+                return info(c);
+            case TRACE:
+                return trace(c);
+            case WARN:
+                return warn(c);
+            default:
+                throw new AssertionError(level);
+        }
+    }
+
+    default <E extends Exception> Logs tlog(Level level, ThrowingLogConsumer<E> c) throws E {
+        switch (level) {
+            case DEBUG:
+                return tdebug(c);
+            case ERROR:
+                return terror(c);
+            case FATAL:
+                return tfatal(c);
+            case INFO:
+                return tinfo(c);
+            case TRACE:
+                return ttrace(c);
+            case WARN:
+                return twarn(c);
+            default:
+                throw new AssertionError(level);
+        }
+    }
+
+    default <E extends Exception, R> R log(Level level, ThrowingLogFunction<E, R> c) throws E {
+        switch (level) {
+            case DEBUG:
+                return tdebug(c);
+            case ERROR:
+                return terror(c);
+            case FATAL:
+                return tfatal(c);
+            case INFO:
+                return tinfo(c);
+            case TRACE:
+                return ttrace(c);
+            case WARN:
+                return twarn(c);
+            default:
+                throw new AssertionError(level);
+        }
+    }
+
 }
