@@ -14,8 +14,6 @@
         <relativePath/>
     </parent>
 
-    <version>2.9.5.1</version>
-
     <artifactId>giulius-bunyan-java-v2</artifactId>
 
     <dependencies>

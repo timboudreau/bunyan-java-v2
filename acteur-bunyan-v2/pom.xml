@@ -14,8 +14,6 @@
         <relativePath/>
     </parent>
 
-    <version>2.9.5.1</version>
-
     <artifactId>acteur-bunyan-v2</artifactId>
 
     <url>https://github.com/timboudreau/bunyan-java-v2</url>
