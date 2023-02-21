@@ -25,6 +25,7 @@
         <module>bunyan-v2-mongodb-sink</module>
         <module>giulius-bunyan-java-v2</module>
         <module>bunyan-java-util-logging-v2</module>
+        <module>bunyan-parse</module>
 
     </modules>
 

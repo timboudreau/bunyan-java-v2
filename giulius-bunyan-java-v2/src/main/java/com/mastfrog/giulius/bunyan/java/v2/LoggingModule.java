@@ -36,6 +36,12 @@ import com.google.inject.name.Names;
 import com.mastfrog.bunyan.java.v2.LogSink;
 import com.mastfrog.bunyan.java.v2.LoggingConfig;
 import com.mastfrog.bunyan.java.v2.Logs;
+import com.mastfrog.giulius.annotations.Setting;
+import static com.mastfrog.giulius.annotations.Setting.Tier.PRIMARY;
+import static com.mastfrog.giulius.annotations.Setting.Tier.SECONDARY;
+import static com.mastfrog.giulius.annotations.Setting.Tier.TERTIARY;
+import static com.mastfrog.giulius.annotations.Setting.ValueType.BOOLEAN;
+import static com.mastfrog.giulius.annotations.Setting.ValueType.INTEGER;
 import com.mastfrog.jackson.JacksonModule;
 import com.mastfrog.jackson.configuration.DurationSerializationMode;
 import com.mastfrog.jackson.configuration.JacksonConfigurer;
@@ -63,52 +69,75 @@ public final class LoggingModule extends AbstractModule {
     /**
      * Settings key for the file to write to, if any.
      */
+    @Setting(value = "The file to log to, if set.", tier = PRIMARY)
     public static final String SETTINGS_KEY_LOG_FILE = "log.file";
     /**
      * Settings key for the minimum log level.
      */
+    @Setting(value = "The log level to log at - one of trace, debug, info, warn, error or fatal.", tier = PRIMARY)
     public static final String SETTINGS_KEY_LOG_LEVEL = "log.level";
     /**
      * Settings key for the host name used in log records (if not set, will be
      * gotten from the system).
      */
+    @Setting(value = "The host name to use in log records")
     public static final String SETTINGS_KEY_LOG_HOSTNAME = "log.hostname";
     /**
      * Settings key - if true, log records are buffered and written by a
      * background thread; more performant but may result in data loss on crash.
      */
+    @Setting(value = "If true, emit all log records asynchronously to avoid delaying the "
+            + "work doing the logging.", type = BOOLEAN, tier = SECONDARY)
     public static final String SETTINGS_KEY_ASYNC_LOGGING = "log.async";
     /**
      * Settings key for whether logging should also be written to the system out
      * (this is the default unless a file is set).
      */
+    @Setting(value = "If true, log to the console.", type = BOOLEAN, tier = PRIMARY)
     public static final String SETTINGS_KEY_LOG_TO_CONSOLE = "log.console";
 
+    @Setting(value = "If set, emit error and fatal log records to a secondary log file.", tier = SECONDARY)
     public static final String SETTINGS_KEY_LOG_SEVERE_TO_FILE = "log.severe.file";
 
+    @Setting(value = "If true, include process-local a sequence number in each log record.", type = BOOLEAN, tier = SECONDARY)
     public static final String SETTINGS_KEY_LOG_SEQUENCE_NUMBERS = "log.seq";
+
+    @Setting(value = "If true, dump the stack and include the caller in log records (not for production use).", type = BOOLEAN, tier = TERTIARY)
     public static final String SETTINGS_KEY_LOG_CALLER = "log.caller";
     public static final String SETTINGS_KEY_ROUTED_LOGS = "log.route";
     public static final String SETTINGS_KEY_ROUTED_LOG_PREFIX = "log.route.";
     public static final String SETTINGS_KEY_ROUTED_LOG_LEVEL_PREFIX = "log.level.";
 
+    @Setting(value = "Sets the priority of async logging threads.", type = INTEGER, tier = TERTIARY)
     public static final String SETTINGS_KEY_ASYNC_THREADS_PRIORITY = "log.async.thread.priority";
 
+    @Setting(value = "Determines what JSON serializer to use to convert log records to JSON - one of "
+            + LoggingConfig.PROP_VALUE_JSON_SERIALIZATION_POLICY_ADAPTIVE + ", " + LoggingConfig.PROP_VALUE_JSON_SERIALIZATION_POLICY_ALWAYS_JACKSON
+            + ", of " + LoggingConfig.PROP_VALUE_JSON_SERIALIZATION_POLICY_NEVER_JACKSON, tier = TERTIARY)
     public static final String SETTINGS_KEY_JSON_SERIALIZATION_POLICY = "log.json.policy";
     public static final String SETTINGS_VALUE_JSON_POLICY_ADAPTIVE = LoggingConfig.PROP_VALUE_JSON_SERIALIZATION_POLICY_ADAPTIVE;
     public static final String SETTINGS_VALUE_JSON_POLICY_ALWAYS_JACKSON = LoggingConfig.PROP_VALUE_JSON_SERIALIZATION_POLICY_ALWAYS_JACKSON;
     public static final String SETTINGS_VALUE_JSON_POLICY_NEVER_JACKSON = LoggingConfig.PROP_VALUE_JSON_SERIALIZATION_POLICY_NEVER_JACKSON;
 
+    @Setting(value = "Bunyan-Java uses a default logging config if one is not set after some time after first use, "
+            + "dumping cached log records created prior to setting it up.  This property sets whether and under what"
+            + " circumstances the injected logging config should take over as the default logging configuration. "
+            + "Possible values are: " + LoggingConfig.PROP_VALUE_DONT_SET_AS_DEFAULT_CONFIG + ", " + LoggingConfig.PROP_VALUE_USE_AS_DEFAULT_CONFIG_IF_UNSET
+            + ", or " + LoggingConfig.PROP_VALUE_TAKE_OVER_AS_DEFAULT_CONFIG, tier = TERTIARY)
     public static final String SETTINGS_KEY_USE_AS_DEFAULT_CONFIG = "log.config.policy";
     public static final String SETTINGS_VALUE_DONT_USE_AS_DEFAULT_CONFIG = LoggingConfig.PROP_VALUE_DONT_SET_AS_DEFAULT_CONFIG;
     public static final String SETTINGS_VALUE_USE_AS_DEFAULT_CONFIG_IF_UNSET = LoggingConfig.PROP_VALUE_USE_AS_DEFAULT_CONFIG_IF_UNSET;
     public static final String SETTINGS_VALUE_TAKE_OVER_DEFAULT_CONFIG = LoggingConfig.PROP_VALUE_TAKE_OVER_AS_DEFAULT_CONFIG;
 
+    @Setting(value = "If true, when a closure-based logging call throws an exception, the "
+            + "logging level will be escalated to error.", type = BOOLEAN, tier = TERTIARY)
     public static final String SETTINGS_KEY_ESCALATE_ON_ERRORS = "log.escalate.errors";
 
     /**
      * Settings key to configure log file rotation.
      */
+    @Setting(value = "The size in Mb at which to end a log file and start a new one (if unset, "
+            + "no rotation is performed).", type = INTEGER, tier = PRIMARY)
     public static final String SETTINGS_KEY_ROTATE_FILES_MB = "log.rotation.mb";
 
     /**
