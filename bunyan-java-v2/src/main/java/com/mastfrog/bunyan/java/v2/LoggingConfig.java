@@ -241,6 +241,8 @@ public final class LoggingConfig implements AutoCloseable {
 
     public static final String PROP_LOG_ROTATION_MAX_SIZE_MB = "bunyan-v2-log-rotation-size-mb";
 
+    private static ThreadLocal<LoggingConfig> TAKING_OVER = new ThreadLocal<>();
+
     @JsonProperty("minLevel")
     private final int minLevel;
     @JsonProperty("levelConfig")
@@ -287,7 +289,13 @@ public final class LoggingConfig implements AutoCloseable {
             HookThread.add(this);
         }
         if (defaultHandling.isSetIt()) {
-            DelayedDelegationLogs.setGlobalLoggingConfig(this, defaultHandling.isForce());
+            LoggingConfig old = TAKING_OVER.get();
+            TAKING_OVER.set(this);
+            try {
+                DelayedDelegationLogs.setGlobalLoggingConfig(this, defaultHandling.isForce());
+            } finally {
+                TAKING_OVER.set(old);
+            }
         }
     }
 
@@ -1121,6 +1129,13 @@ public final class LoggingConfig implements AutoCloseable {
         @Override
         public LoggingConfig get() {
             if (config == null) {
+                // Race condition when a new logging config registered
+                // by guice is taking over for no config, and closes
+                // a bunch of temporary configs
+                LoggingConfig to = TAKING_OVER.get();
+                if (to != null) {
+                    return to;
+                }
                 throw new IllegalStateException("Called before LoggingConfig initialized");
             }
             return config;
