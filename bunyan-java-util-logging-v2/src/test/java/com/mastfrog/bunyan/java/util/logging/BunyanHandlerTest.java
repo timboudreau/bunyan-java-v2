@@ -31,7 +31,7 @@ import com.mastfrog.bunyan.java.v2.LoggingConfig;
 import com.mastfrog.bunyan.java.v2.Logs;
 import com.mastfrog.giulius.bunyan.java.v2.LoggingModule;
 import com.mastfrog.giulius.tests.GuiceRunner;
-import com.mastfrog.giulius.tests.TestWith;
+import com.mastfrog.giulius.tests.anno.TestWith;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;

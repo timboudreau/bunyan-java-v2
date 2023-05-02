@@ -36,7 +36,7 @@ import static com.mastfrog.giulius.bunyan.java.v2.LoggingModule.GUICE_BINDING_DE
 import com.mastfrog.giulius.mongodb.async.MongoFutureCollection;
 import com.mastfrog.giulius.mongodb.async.MongoHarness;
 import com.mastfrog.giulius.mongodb.async.TestSupport;
-import com.mastfrog.giulius.tests.IfBinaryAvailable;
+import com.mastfrog.giulius.tests.anno.IfBinaryAvailable;
 import com.mastfrog.settings.Settings;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
